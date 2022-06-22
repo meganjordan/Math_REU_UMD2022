@@ -99,7 +99,7 @@ std::unordered_map<int, size_t> evallist(int n, int loopVal) {
     tmp.open(ev::filename + "_tmp.txt");
 
     // Section of code to be threaded
-    auto f = [n, &v, &tmp, &umap](int i, int j) {
+    auto f = [n, &v, &tmp, &umap](const int i, const int j) {
         std::vector<int> temp = evalwmult(i, j, n);
 
         ev::m.lock();
