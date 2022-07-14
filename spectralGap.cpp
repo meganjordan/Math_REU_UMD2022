@@ -8,7 +8,7 @@
 #include <thread>
 #include <mutex>
 
-#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 
 using Eigen::MatrixX;
 using item = long double;
@@ -136,14 +136,16 @@ mat tridiag(const dimension k, const std::complex<item> t, const bool useV) {
 * @param m Matrix of which to export the eigenvalues
 * @param filename Name of file to export eigenvalues to
 */
-void exportEigens(const mat m, const std::string filename) {
+void exportEigens(const mat m, const mat n, item t, const std::string filename) {
 	std::ofstream file;
 	file.open(filename);
 
 	vec e = m.eigenvalues();
+	vec f = n.eigenvalues();
 
 	for (int i = 0; i < e.size(); i++) {
-		file << std::to_string(std::real(e(i))) << ",";
+		file << "  " << std::to_string(std::real(e(i))) << "  " << 0.0 << "\n"
+		<< "  "  << std::to_string(std::real(f(i))) << "  " << 0.0 << "\n";
 	}
 
 	file.close();
@@ -174,26 +176,32 @@ mat toSymmetrical(mat m) {
 	return m;
 }
 
-int main() {
+int main(int argc, char** argv) {
 	//Eigen::setNbThreads(48);
-
+	
 	std::vector<std::thread> threads;
-
+	
 	dimension k = 4;
-
-	bool useV = false;
-	std::string directory;
-	if (useV) {
-		directory = "D:\\V\\";
+	if (argc > 2) {
+		k = std::atoi(argv[2]);
 	}
-	else {
-		directory = "D:\\W\\";
+
+	std::string directory;
+	if (argc > 1) {
+		directory = argv[1];
 	}
 
 	// How many t values to view eigenvalues of
-	//item howMany = 1000.0;
-	for (item t = 0.7; t >= 0.0; t -= 0.001) {
-		threads.push_back(std::thread(exportEigens, tridiag(k, t, useV),
+	item tIter = 0.001, tInit = 0.7;
+	if (argc > 3) {
+		tIter = std::atof(argv[3]);
+	}
+	if (argc > 4)
+	{
+		tInit = std::atof(argv[4]);
+	}
+	for (item t = tInit; t >= 0.0; t -= tIter) {
+		threads.push_back(std::thread(exportEigens, tridiag(k, t, true), tridiag(k, t, false), t,
 			directory + std::to_string(k) + "k - " + std::to_string(t) + "t.txt"));
 	}
 
@@ -201,7 +209,7 @@ int main() {
 		t.join();
 	}
 
-	exportEigens(tridiag(k, 0.0, useV), directory + std::to_string(k) + "k - 0.000000t.txt");
+	exportEigens(tridiag(k, 0.0, true), tridiag(k, 0.0, false), t, directory + std::to_string(k) + "k - 0.000000t.txt");
 
 	return 0;
 }
