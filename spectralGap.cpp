@@ -131,23 +131,26 @@ std::pair<mat,mat> tridiag(const dimension k, const std::complex<item> t) {
  * Exports the eigenvalues of a matrix to an output file.
  * 
  * @param p The computed matrices of which to export the eigenvalues, V as 'first' and W as 'second'
- * @param t t value that eigenvalues are collected from
+ * @param k Max dimension of eigenvalues
  * @param filename Name of file to export eigenvalues to
  */
-void exportEigens(const std::pair<mat,mat> p, item t, const std::string filename) {
+void exportEigens(const dimension kInit, item t, const std::string filename) {
 	std::ofstream file;
-	file.open(filename, std::ios_base::app);
+	file.open(filename);
 
-	vec vEigens = p.first.eigenvalues();
-	vec wEigens = p.second.eigenvalues();
+	for (dimension kIter = kInit; kIter > 0; kIter--) {
+		std::pair<mat,mat> p = tridiag(kIter, t);
 
-	// We are assuming that the two inputted vectors have the same dimensions
-	for (int i = 0; i < vEigens.size(); i++) {
-		file << "  " << std::to_string(std::real(vEigens(i))) << "  " << 0.0 << "\n";
-	} for (int i = 0; i < wEigens.size(); i++) {
-		file << "  "  << std::to_string(std::real(wEigens(i))) << "  " << 0.0 << "\n";
+		vec vEigens = p.first.eigenvalues();
+		vec wEigens = p.second.eigenvalues();
+
+		// We are assuming that the two inputted vectors have the same dimensions
+		for (int i = 0; i < vEigens.size(); i++) {
+			file << "  " << std::to_string(std::real(vEigens(i))) << "  " << 0.0 << "\n";
+		} for (int i = 0; i < wEigens.size(); i++) {
+			file << "  "  << std::to_string(std::real(wEigens(i))) << "  " << 0.0 << "\n";
+		}
 	}
-
 	file.close();
 }
 
@@ -201,18 +204,18 @@ int main(int argc, char** argv) {
 	{
 		tInit = std::atof(argv[4]);
 	}
-	for (dimension kIter = kInit; kIter > 0; kIter--) {
-		for (item t = tInit; t >= -tIter; t -= tIter) {
+	for (item t = tInit; t >= -tIter; t -= tIter) {
+		for (dimension kIter = kInit; kIter > 0; kIter--) {
 			std::string strT = std::to_string(t);
 			if (t < 0.0) {
 				strT = std::to_string(0.0);
 			}
 			std::cout << strT.substr(0,8);
 			std::cout << "\b\b\b\b\b\b\b\b\b";
-			threads.push_back(std::thread(exportEigens, tridiag(kIter, t), t,
-						directory + std::to_string(kInit) + "k - " + strT + "t.txt"));
+			threads.push_back(std::thread(exportEigens, kIter, t,
+						directory + std::to_string(kIter) + "k_" + strT + "t.txt"));
 		}
-	}
+	}	
 	std::cout << std::endl;
 	for (auto& t : threads) {
 		t.join();
