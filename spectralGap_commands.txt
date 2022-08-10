@@ -1,0 +1,16 @@
+# Usage:
+#  gnuplot < spectralGap_commands.txt
+#
+set term pngcairo size 1280, 720 font "Source-Code-Pro-Regular,12"
+set xlabel 'Eigenvalues'
+set ylabel ''
+set title 'Eigenvalues of □_b^t on the Rossi Sphere'
+set xrange [0:100]
+set yrange [-1:1]
+set grid
+do for [ file in system('ls') ] {
+#file = "./newoutputs/4k_000000t.txt"
+set output "./Graphs/".file.".png"
+plot file using 1:2 lw 3 lc rgb "#cc99dd" pt 7
+}
+quit
