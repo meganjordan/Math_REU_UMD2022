@@ -14,4 +14,9 @@ do for [ file in system('ls') ] {
 	set output "./Graphs/".file.".png"
 	plot file using 1:2 lw 3 lc rgb "#cc99dd" pt 7
 }
+set output "./Graphs/Spectral_Gaps.png"
+set title 'Spectral Gaps of Eigenvalues of □_b^t on the Rossi Sphere'
+do for [ file in system('ls gaps') ] {
+	plot file using 1:2 lw 3 lc rgb "#cc99dd" pt 7
+}
 quit
