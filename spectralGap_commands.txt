@@ -5,13 +5,13 @@ set term pngcairo size 1280, 720 font "Source-Code-Pro-Regular,24"
 set xlabel 'Eigenvalues'
 set ylabel ''
 set xrange [0:100]
-set yrange [-1:1]
+set yrange [0:11]
 set grid
 set nokey
 set pointsize 2
 do for [ file in system('ls') ] {
-set title 'Eigenvalues of □_b^t on the Rossi Sphere for '.file
-set output "./Graphs/".file.".png"
-plot file using 1:2 lw 3 lc rgb "#cc99dd" pt 7
+	set title 'Eigenvalues of □_b^t on the Rossi Sphere for '.file
+	set output "./Graphs/".file.".png"
+	plot file using 1:2 lw 3 lc rgb "#cc99dd" pt 7
 }
 quit

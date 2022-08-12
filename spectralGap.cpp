@@ -146,9 +146,9 @@ void exportEigens(const dimension kInit, item t, const std::string filename) {
 
 		// We are assuming that the two inputted vectors have the same dimensions
 		for (int i = 0; i < vEigens.size(); i++) {
-			file << "  " << std::to_string(std::real(vEigens(i))) << "  " << 0.0 << "\n";
+			file << "  " << std::to_string(std::real(vEigens(i))) << "  " << kIter << "\n";
 		} for (int i = 0; i < wEigens.size(); i++) {
-			file << "  "  << std::to_string(std::real(wEigens(i))) << "  " << 0.0 << "\n";
+			file << "  "  << std::to_string(std::real(wEigens(i))) << "  " << kIter + 0.5 << "\n";
 		}
 	}
 	file.close();
@@ -189,10 +189,6 @@ int main(int argc, char** argv) {
 	if (argc > 2) {
 		kInit = std::atoi(argv[2]);
 	}
-	dimension kMin = 0;
-	if (argc > 3) {
-		kMin = std::atoi(argv[3]);
-	}
 
 	std::string directory;
 	if (argc > 1) {
@@ -201,26 +197,24 @@ int main(int argc, char** argv) {
 
 	// How many t values to view eigenvalues of
 	item tIter = 0.001, tInit = 0.7;
-	if (argc > 5) {
-		tIter = std::atof(argv[5]);
+	if (argc > 4) {
+		tIter = std::atof(argv[4]);
 	}
-	if (argc > 4)
+	if (argc > 3)
 	{
-		tInit = std::atof(argv[4]);
+		tInit = std::atof(argv[3]);
 	}
 	for (item t = tInit; t >= -tIter; t -= tIter) {
-		for (dimension kIter = kInit; kIter > kMin; kIter--) {
-			std::string strT = std::to_string(t);
-			if (t < 0.0) {
-				strT = std::to_string(0.0);
-			}
-			std::cout << strT.substr(0,8);
-			std::cout << "\b\b\b\b\b\b\b\b\b";
-			unsigned int n = 5;
-			n = n - std::to_string(kIter).size();
-			threads.push_back(std::thread(exportEigens, kIter, t,
-						directory + std::string(n, '0') + std::to_string(kIter) + "k-" + strT + "t.txt"));
+		std::string strT = std::to_string(t);
+		if (t < 0.0) {
+			strT = std::to_string(0.0);
 		}
+		std::cout << strT.substr(0,8);
+		std::cout << "\b\b\b\b\b\b\b\b\b";
+		unsigned int n = 5;
+		n = n - std::to_string(kInit).size();
+		threads.push_back(std::thread(exportEigens, kInit, t,
+					directory + std::string(n, '0') + std::to_string(kInit) + "k-" + strT + "t.txt"));
 	}	
 	std::cout << std::endl;
 	for (auto& t : threads) {
