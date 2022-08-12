@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <complex>
+#include <limits>
 
 #include <thread>
 #include <mutex>
@@ -138,19 +139,38 @@ void exportEigens(const dimension kInit, item t, const std::string filename) {
 	std::ofstream file;
 	file.open(filename);
 
+	std::vector<double> specGaps;
+	
 	for (dimension kIter = kInit; kIter > 0; kIter--) {
 		std::pair<mat,mat> p = tridiag(kIter, t);
 
 		vec vEigens = p.first.eigenvalues();
 		vec wEigens = p.second.eigenvalues();
+		std::complex<double> vTemp = std::numeric_limits<double>::max();
+		std::complex<double> wTemp = std::numeric_limits<double>::max();
 
 		// We are assuming that the two inputted vectors have the same dimensions
 		for (int i = 0; i < vEigens.size(); i++) {
+			if (vEigens(i).real() < vTemp.real()) {
+				vTemp = vEigens(i);
+			}
 			file << "  " << std::to_string(std::real(vEigens(i))) << "  " << kIter << "\n";
 		} for (int i = 0; i < wEigens.size(); i++) {
+			if (wEigens(i).real() < wTemp.real()) {
+				wTemp = wEigens(i);
+			}
 			file << "  "  << std::to_string(std::real(wEigens(i))) << "  " << kIter + 0.5 << "\n";
 		}
+		specGaps.push_back(std::real(wTemp-vTemp));
 	}
+	
+	std::ofstream gapFile;
+	gapFile.open(filename + "_gaps.txt");
+	for (int i = 0; i < specGaps.size(); i++) {
+		gapFile << specGaps.at(i) << "  " << t << "\n";
+	}
+	gapFile.close();
+	
 	file.close();
 }
 
